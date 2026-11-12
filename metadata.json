@@ -1,0 +1,6 @@
+{
+  "name": "S2S Global Exim - Agro Spices & Powders Exporter",
+  "description": "Premium manufacturer-to-buyer merchandise exporter from Cuddalore, Tamil Nadu, India for Moringa, Turmeric, Onion, and Garlic powders with B2B order portal and supply chain transparency.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
