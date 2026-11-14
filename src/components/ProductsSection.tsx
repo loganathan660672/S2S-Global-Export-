@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ProductSpec, CurrencyCode } from '../types';
-import { PRODUCTS, CURRENCY_RATES } from '../data/products';
+import { PRODUCTS } from '../data/products';
 import { useLanguage } from '../i18n/LanguageContext';
 import { FileText, ArrowRight, CheckCircle2, X, Download, ShieldCheck, Image as ImageIcon, Sparkles, Layers } from 'lucide-react';
 
@@ -10,7 +10,6 @@ interface ProductsSectionProps {
 }
 
 export const ProductsSection: React.FC<ProductsSectionProps> = ({
-  currency,
   onSelectForRFQ,
 }) => {
   const { t } = useLanguage();
@@ -19,9 +18,6 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
   const [activeModalImageIndex, setActiveModalImageIndex] = useState<number>(0);
   const [downloadSuccessToast, setDownloadSuccessToast] = useState<string | null>(null);
   const [showCatalogSheetModal, setShowCatalogSheetModal] = useState<string | null>(null);
-
-  const rate = CURRENCY_RATES[currency]?.rateFromUSD || 1.0;
-  const symbol = CURRENCY_RATES[currency]?.symbol || '$';
 
   const categories = [
     { id: 'all', label: t('prod.catAll') },
@@ -35,11 +31,6 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
     selectedCategory === 'all'
       ? PRODUCTS
       : PRODUCTS.filter((p) => p.category === selectedCategory);
-
-  const formatPrice = (usdPrice: number) => {
-    const converted = usdPrice * rate;
-    return `${symbol}${converted.toFixed(2)}`;
-  };
 
   const handleSimulateCOADownload = (product: ProductSpec) => {
     setDownloadSuccessToast(`Downloading Official Batch COA (${product.coaSample.batchNumber}) PDF...`);
@@ -174,18 +165,18 @@ export const ProductsSection: React.FC<ProductsSectionProps> = ({
                       </div>
                     </div>
 
-                    {/* Commercial Benchmark & MOQ */}
+                    {/* Commercial MOQ & Dispatch Lead Time */}
                     <div className="grid grid-cols-2 gap-2 py-2 border-y border-stone-100 text-xs">
-                      <div>
-                        <div className="text-stone-400 text-[11px]">{t('prod.benchmark')}</div>
-                        <div className="text-sm font-bold font-mono-numbers text-stone-900">
-                          {formatPrice(product.basePriceUSDPerKg)} <span className="text-[10px] font-normal text-stone-500">/ kg FOB</span>
-                        </div>
-                      </div>
                       <div>
                         <div className="text-stone-400 text-[11px]">{t('prod.moq')}</div>
                         <div className="text-sm font-semibold font-mono-numbers text-stone-900">
                           {product.moqCommercialKg.toLocaleString()} kg
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-stone-400 text-[11px]">Dispatch Lead Time</div>
+                        <div className="text-sm font-semibold font-mono-numbers text-emerald-800">
+                          {product.leadTimeDays} Days <span className="text-[10px] font-normal text-stone-500">· Quote on RFQ</span>
                         </div>
                       </div>
                     </div>

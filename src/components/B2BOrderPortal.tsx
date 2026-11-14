@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { PRODUCTS, CURRENCY_RATES } from '../data/products';
+import { PRODUCTS } from '../data/products';
 import { CurrencyCode, Incoterm, PackagingType, RFQItem, RFQSubmission } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
-import { Container, Plus, Trash2, CheckCircle2, FileText, Send, Printer, ArrowRight, ShieldCheck } from 'lucide-react';
+import { dispatchEnquiryEmail, EmailDispatchResult, SALES_EMAIL } from '../utils/emailDispatch';
+import { Container, Plus, Trash2, CheckCircle2, FileText, Send, Printer, ArrowRight, ShieldCheck, Mail, MessageSquare, Copy, Check } from 'lucide-react';
 
 interface B2BOrderPortalProps {
   currency: CurrencyCode;
@@ -54,11 +55,9 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
 
   // Submission State
   const [submittedRFQ, setSubmittedRFQ] = useState<RFQSubmission | null>(null);
+  const [rfqEmailResult, setRfqEmailResult] = useState<EmailDispatchResult | null>(null);
+  const [copiedRfq, setCopiedRfq] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  // Currency computation
-  const rate = CURRENCY_RATES[currency]?.rateFromUSD || 1.0;
-  const symbol = CURRENCY_RATES[currency]?.symbol || '$';
 
   // Container Limits
   const containerLimits: Record<string, { maxMT: number; optimalMinMT: number }> = {
@@ -71,34 +70,6 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
   const totalLoadedMT = items.reduce((acc, it) => acc + (it.quantityMetricTons || 0), 0);
   const currentMax = containerLimits[containerType].maxMT;
   const utilizationPercentage = Math.min(100, Math.round((totalLoadedMT / currentMax) * 100));
-
-  // Price estimate calculation
-  const calculateTotalUSD = () => {
-    let productTotal = 0;
-    items.forEach((item) => {
-      const prod = PRODUCTS.find((p) => p.id === item.productId);
-      const pricePerKg = prod?.basePriceUSDPerKg || 4.5;
-      const kg = (item.quantityMetricTons || 0) * 1000;
-      productTotal += pricePerKg * kg;
-    });
-
-    // Freight estimate additions based on Incoterm
-    let freightEstimate = 0;
-    if (incoterm.startsWith('CIF')) {
-      freightEstimate = totalLoadedMT * 120 + 400; // estimated ocean freight & insurance per MT
-    } else if (incoterm.startsWith('CFR')) {
-      freightEstimate = totalLoadedMT * 105 + 250;
-    }
-
-    if (includeSampleKit) {
-      productTotal += 85; // Sample preparation & air phytosanitary courier base fee
-    }
-
-    return productTotal + freightEstimate;
-  };
-
-  const totalEstimatedUSD = calculateTotalUSD();
-  const totalInSelectedCurrency = totalEstimatedUSD * rate;
 
   const handleAddItem = () => {
     const defaultProd = PRODUCTS[0];
@@ -135,12 +106,13 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
     setItems(updated);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    const refId = `S2S-RFQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const submission: RFQSubmission = {
-      id: `S2S-RFQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: refId,
       buyerName: buyerName || 'Trade Buyer',
       companyName: companyName || 'International Food/Nutra Importer',
       country: country || 'Global Buyer',
@@ -152,14 +124,46 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
       items,
       containerRequirement: containerType,
       customNotes: notes,
-      estimatedTotalUSD: totalEstimatedUSD,
       submittedAt: new Date().toISOString().split('T')[0],
     };
 
-    setTimeout(() => {
-      setSubmittedRFQ(submission);
-      setIsSubmitting(false);
-    }, 600);
+    const itemizedLines = items
+      .map((it, idx) => {
+        const prod = PRODUCTS.find((p) => p.id === it.productId);
+        return `${idx + 1}. ${it.productName} (HS ${prod?.hsCode || '0910.30'}) | Qty: ${it.quantityMetricTons} MT (${(it.quantityMetricTons * 1000).toLocaleString()} kg) | Mesh: ${it.meshSize} | Pkg: ${it.packaging}`;
+      })
+      .join('\n');
+
+    const result = await dispatchEnquiryEmail({
+      subject: `B2B Export RFQ [${refId}] - ${submission.companyName} (${totalLoadedMT.toFixed(2)} MT ${containerType})`,
+      replyTo: email,
+      fields: {
+        'RFQ Reference ID': refId,
+        'Buyer Name': submission.buyerName,
+        'Company / Organization': submission.companyName,
+        'Country': submission.country,
+        'Business Email': email,
+        'WhatsApp / Phone': phoneWhatsapp,
+        'Container Requirement': `${containerType} (Total: ${totalLoadedMT.toFixed(2)} MT / ${(totalLoadedMT * 1000).toLocaleString()} kg)`,
+        'Incoterms 2020': incoterm,
+        'Target Discharge Port': destinationPort,
+        'Preferred Quote Currency': currency,
+        '2kg Lab Sample Kit': includeSampleKit ? 'Yes - Include Certified 2kg Sample Kit' : 'No',
+        'Special Requirements': notes || 'Standard Export Spec',
+        'Itemized Commodities': `\n${itemizedLines}`,
+      },
+    });
+
+    setRfqEmailResult(result);
+    setSubmittedRFQ(submission);
+    setIsSubmitting(false);
+  };
+
+  const handleCopyRFQ = () => {
+    if (!rfqEmailResult) return;
+    navigator.clipboard.writeText(rfqEmailResult.formattedBody);
+    setCopiedRfq(true);
+    setTimeout(() => setCopiedRfq(false), 2500);
   };
 
   const handlePrint = () => {
@@ -258,12 +262,12 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
               </div>
 
               <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                <span className="text-emerald-800 block uppercase">Estimated Proforma Total</span>
-                <strong className="text-emerald-950 block text-lg font-mono-numbers font-bold">
-                  {symbol}{totalInSelectedCurrency.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                <span className="text-emerald-800 block uppercase">Quotation Status</span>
+                <strong className="text-emerald-950 block text-base font-bold">
+                  Custom Quote in {submittedRFQ.targetCurrency}
                 </strong>
-                <span className="text-[11px] text-emerald-800 font-mono-numbers">
-                  (~${submittedRFQ.estimatedTotalUSD.toLocaleString()} USD)
+                <span className="text-[11px] text-emerald-800">
+                  Live origin tariff dispatched within 12h
                 </span>
               </div>
             </div>
@@ -277,13 +281,12 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
                     <th className="py-2.5 px-3">Mesh Fineness</th>
                     <th className="py-2.5 px-3">Packaging Spec</th>
                     <th className="py-2.5 px-3 text-right">Quantity</th>
-                    <th className="py-2.5 px-3 text-right">Est. Unit Price</th>
+                    <th className="py-2.5 px-3 text-right">HS Code</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100 font-mono-numbers">
                   {submittedRFQ.items.map((it, idx) => {
                     const prod = PRODUCTS.find((p) => p.id === it.productId);
-                    const unitPriceUSD = prod?.basePriceUSDPerKg || 4.0;
                     return (
                       <tr key={idx} className="hover:bg-stone-50/50">
                         <td className="py-2.5 px-3 font-sans font-medium text-stone-900">
@@ -295,7 +298,7 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
                           {it.quantityMetricTons} MT ({(it.quantityMetricTons * 1000).toLocaleString()} kg)
                         </td>
                         <td className="py-2.5 px-3 text-right text-emerald-800 font-semibold">
-                          {symbol}{(unitPriceUSD * rate).toFixed(2)} / kg
+                          {prod?.hsCode || '0910.30'}
                         </td>
                       </tr>
                     );
@@ -304,15 +307,48 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
               </table>
             </div>
 
-            {/* Next steps notice */}
-            <div className="p-4 bg-stone-50 rounded-lg border border-stone-200 text-xs text-stone-600 space-y-2">
-              <div className="font-semibold text-stone-900 flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-700" />
-                <span>Next Operational Steps with S2S Global Exim Desk:</span>
+            {/* Next steps & Direct Email Dispatch */}
+            <div className="p-4 bg-emerald-50/70 rounded-lg border border-emerald-200 text-xs text-stone-700 space-y-3">
+              <div className="font-semibold text-emerald-950 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>
+                  {rfqEmailResult?.relayStatus === 'sent'
+                    ? `All RFQ Details Sent Immediately to ${SALES_EMAIL}`
+                    : `RFQ Prepared for Immediate Email Dispatch to ${SALES_EMAIL}`}
+                </span>
               </div>
-              <p>
-                Our international export manager at Cuddalore will contact your representative at <strong className="text-stone-900">{submittedRFQ.email || submittedRFQ.phoneWhatsapp}</strong> within 12 hours with the formal stamped Proforma Invoice, ocean shipping schedules from Chennai/Tuticorin, and official phytosanitary batch dossiers. You can also connect directly via WhatsApp at <a href="https://wa.me/919894660672" className="text-emerald-800 font-semibold underline">+91 9894660672</a>.
+              <p className="text-stone-600 leading-relaxed">
+                Our international export manager at Cuddalore will contact <strong className="text-stone-900">{submittedRFQ.email || submittedRFQ.phoneWhatsapp}</strong> within 12 hours from <a href={`mailto:${SALES_EMAIL}`} className="text-emerald-800 font-semibold underline">{SALES_EMAIL}</a> with the formal Proforma Invoice, ocean schedules from Chennai/Tuticorin, and phytosanitary dossiers.
               </p>
+
+              {rfqEmailResult && (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <a
+                    href={rfqEmailResult.mailtoUrl}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Open Email Client ({SALES_EMAIL})</span>
+                  </a>
+                  <a
+                    href={rfqEmailResult.whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-stone-900 hover:bg-stone-800 text-amber-300 rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>Send via WhatsApp (+91 9894660672)</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleCopyRFQ}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    {copiedRfq ? <Check className="w-3.5 h-3.5 text-emerald-700" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedRfq ? 'Copied RFQ' : 'Copy Full RFQ'}</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -517,7 +553,7 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
                             HS Code: <strong className="text-stone-700 font-mono-numbers">{currentProd.hsCode}</strong> · Direct Tamil Nadu origin
                           </span>
                           <span className="font-mono-numbers">
-                            Net Weight: {(item.quantityMetricTons * 1000).toLocaleString()} kg · Est: {symbol}{((currentProd.basePriceUSDPerKg * item.quantityMetricTons * 1000) * rate).toFixed(0)}
+                            Net Weight: {(item.quantityMetricTons * 1000).toLocaleString()} kg · Lead Time: {currentProd.leadTimeDays} Days
                           </span>
                         </div>
                       </div>
@@ -591,7 +627,7 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
               <div className="bg-stone-900 text-white border border-stone-800 rounded-xl p-6 space-y-5 shadow-xl">
                 <div className="flex items-center justify-between pb-3 border-b border-stone-800">
                   <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-                    Export Proforma Estimate
+                    Export Cargo &amp; Quote Summary
                   </span>
                   <span className="text-xs font-mono-numbers px-2 py-0.5 bg-stone-800 rounded text-stone-300">
                     {currency}
@@ -622,15 +658,15 @@ export const B2BOrderPortal: React.FC<B2BOrderPortalProps> = ({
 
                   <div className="pt-3 border-t border-stone-800 flex items-baseline justify-between">
                     <div>
-                      <div className="text-xs text-stone-400">{t('portal.proformaTotal')}</div>
-                      <div className="text-[10px] text-stone-500 font-mono-numbers">(Direct Farm-Gate Basis)</div>
+                      <div className="text-xs text-stone-400">Commercial Pricing</div>
+                      <div className="text-[10px] text-stone-500 font-mono-numbers">(Direct Origin Quote)</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold font-mono-numbers text-emerald-400">
-                        {symbol}{totalInSelectedCurrency.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      <div className="text-base font-bold text-emerald-400">
+                        Quote on Request
                       </div>
-                      <div className="text-[11px] text-stone-400 font-mono-numbers">
-                        ~${totalEstimatedUSD.toLocaleString()} USD
+                      <div className="text-[11px] text-stone-400">
+                        Issued in {currency} within 12h
                       </div>
                     </div>
                   </div>

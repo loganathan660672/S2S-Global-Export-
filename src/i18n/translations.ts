@@ -99,6 +99,14 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.address': '113 Kamaraj Nagar, Vanniar Palayam, Cuddalore, Tamil Nadu, India.',
     'contact.sendInquiry': 'Send Direct Export Inquiry',
     'contact.submitButton': 'Transmit Inquiry to Cuddalore Export Office',
+
+    // FAQ
+    'faq.badge': 'International Trade Desk · Commercial Policies',
+    'faq.title': 'Frequently Asked Export & Procurement Questions',
+    'faq.subtitle': 'Clear technical answers on Incoterms 2020, minimum order quantities, international payment instruments, and destination customs compliance.',
+    'faq.ctaTitle': 'Have a Custom Container or Private-Label Requirement?',
+    'faq.ctaSubtitle': 'Speak directly with our Cuddalore export coordinators for blended FCL pricing or destination port CIF tariffs.',
+    'faq.ctaButton': 'Launch B2B RFQ Portal',
   },
 
   es: {
@@ -183,6 +191,14 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.address': '113 Kamaraj Nagar, Vanniar Palayam, Cuddalore, Tamil Nadu, India.',
     'contact.sendInquiry': 'Enviar Consulta Directa de Exportación',
     'contact.submitButton': 'Transmitir Consulta a la Oficina de Exportación',
+
+    // FAQ
+    'faq.badge': 'Mesa de Comercio Exterior · Políticas Comerciales',
+    'faq.title': 'Preguntas Frecuentes de Exportación y Compras B2B',
+    'faq.subtitle': 'Respuestas claras sobre Incoterms 2020, cantidades mínimas de pedido (MOQ), métodos de pago internacional y cumplimiento aduanero.',
+    'faq.ctaTitle': '¿Tiene un Requisito de Contenedor Mixto o Marca Privada?',
+    'faq.ctaSubtitle': 'Hable directamente con nuestros coordinadores en Cuddalore para cotizaciones FCL o tarifas CIF en su puerto.',
+    'faq.ctaButton': 'Abrir Portal RFQ B2B',
   },
 
   fr: {
@@ -267,6 +283,14 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.address': '113 Kamaraj Nagar, Vanniar Palayam, Cuddalore, Tamil Nadu, Inde.',
     'contact.sendInquiry': 'Envoyer une Demande Directe',
     'contact.submitButton': 'Transmettre la Demande au Bureau Export',
+
+    // FAQ
+    'faq.badge': 'Bureau du Commerce International · Politiques Commerciales',
+    'faq.title': 'Questions Fréquentes sur l’Exportation & Commandes B2B',
+    'faq.subtitle': 'Réponses précises sur les Incoterms 2020, quantités minimales (MOQ), modalités de paiement sécurisées et conformité douanière.',
+    'faq.ctaTitle': 'Besoin d’un Conteneur Mixte ou d’un Emballage Marque Blanche ?',
+    'faq.ctaSubtitle': 'Échangez directement avec notre équipe export à Cuddalore pour un tarif FCL ou CIF dédié.',
+    'faq.ctaButton': 'Lancer le Portail B2B',
   },
 
   ar: {
@@ -351,6 +375,14 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.address': '113 كاماراج ناجار، فانيار بالايام، كودالور، تاميل نادو، الهند.',
     'contact.sendInquiry': 'إرسال استفسار تجاري مباشر',
     'contact.submitButton': 'إرسال الاستفسار إلى مكتب التصدير',
+
+    // FAQ
+    'faq.badge': 'مكتب التجارة الدولية · السياسات التجارية',
+    'faq.title': 'الأسئلة الشائعة حول التصدير والطلبات التجارية B2B',
+    'faq.subtitle': 'إجابات تفصيلية حول شروط الشحن الدولية (Incoterms 2020)، الحد الأدنى للطلب، طرق الدفع البنكية، ومعايير التخليص الجمركي.',
+    'faq.ctaTitle': 'هل لديكم متطلبات حاويات مختلطة أو تعبئة علامة تجارية خاصة؟',
+    'faq.ctaSubtitle': 'تواصل مباشرة مع فريق التصدير في كودالور للحصول على تسعيرة شحن CIF أو FOB.',
+    'faq.ctaButton': 'فتح بوابة طلبات B2B',
   },
 
   de: {
@@ -435,5 +467,13 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.address': '113 Kamaraj Nagar, Vanniar Palayam, Cuddalore, Tamil Nadu, Indien.',
     'contact.sendInquiry': 'Direkte Exportanfrage senden',
     'contact.submitButton': 'Anfrage an das Exportbüro übermitteln',
+
+    // FAQ
+    'faq.badge': 'Außenhandelsbüro · Handelsbedingungen',
+    'faq.title': 'Häufig gestellte Fragen zu Export & B2B-Beschaffung',
+    'faq.subtitle': 'Klare Antworten zu Incoterms 2020, Mindestbestellmengen (MOQ), internationalen Zahlungsmethoden und EU-/FDA-Zollkonformität.',
+    'faq.ctaTitle': 'Benötigen Sie Mischcontainer oder Private-Label-Verpackungen?',
+    'faq.ctaSubtitle': 'Sprechen Sie direkt mit unseren Exportkoordinatoren in Cuddalore für maßgeschneiderte FCL- oder CIF-Tarife.',
+    'faq.ctaButton': 'B2B-Angebotsportal starten',
   },
 };

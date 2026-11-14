@@ -655,7 +655,6 @@ export const CERTIFICATIONS: {
   id: string;
   name: string;
   authority: string;
-  regNumber: string;
   category: string;
   description: string;
 }[] = [
@@ -663,7 +662,6 @@ export const CERTIFICATIONS: {
     id: 'apeda',
     name: 'APEDA Export Certification',
     authority: 'Ministry of Commerce & Industry, Govt of India',
-    regNumber: 'APEDA/REG/TN/2024/78219',
     category: 'Export Development',
     description: 'Mandatory export accreditation for agricultural & processed food products shipped worldwide from Indian seaports.',
   },
@@ -671,7 +669,6 @@ export const CERTIFICATIONS: {
     id: 'fssai-export',
     name: 'FSSAI Central Export License',
     authority: 'Food Safety and Standards Authority of India',
-    regNumber: '10024042000892',
     category: 'Food Safety',
     description: 'Central license certifying compliance with statutory hygiene, heavy metals, pesticide tolerances, and cleanroom handling.',
   },
@@ -679,7 +676,6 @@ export const CERTIFICATIONS: {
     id: 'spices-board',
     name: 'Spices Board India CRES',
     authority: 'Spices Board, Ministry of Commerce, Govt of India',
-    regNumber: 'SB/EXP/TN/CDL/8921',
     category: 'Quality Grading',
     description: 'Certificate of Registration as Exporter of Spices confirming conformity with ASTA/ESA international spice standards.',
   },
@@ -687,7 +683,6 @@ export const CERTIFICATIONS: {
     id: 'usda-organic',
     name: 'USDA Organic / NPOP Compliance',
     authority: 'National Programme for Organic Production (NPOP) & USDA Equivalent',
-    regNumber: 'ORG/SC/2401/001429',
     category: 'Organic Integrity',
     description: 'Certified 100% organic farm sourcing for Moringa, Turmeric, and herbs with complete soil and supply chain audit trail.',
   },
@@ -695,7 +690,6 @@ export const CERTIFICATIONS: {
     id: 'iso-22000',
     name: 'ISO 22000:2018 & HACCP',
     authority: 'TUV Rheinland / International Organization for Standardization',
-    regNumber: 'ISO22K-IND-2023-9912',
     category: 'Safety Management',
     description: 'Hazard Analysis Critical Control Point (HACCP) system certified across dehydration, milling, sieving, and vacuum packing.',
   },
@@ -703,7 +697,6 @@ export const CERTIFICATIONS: {
     id: 'us-fda',
     name: 'US FDA Food Facility Registration',
     authority: 'United States Food and Drug Administration',
-    regNumber: 'FDA-FFR: 19827401284',
     category: 'US Import Compliance',
     description: 'Registered foreign food merchandise export facility with Prior Notice compliance for US port entry.',
   },
@@ -711,7 +704,6 @@ export const CERTIFICATIONS: {
     id: 'halal-kosher',
     name: 'Halal & Kosher Compliance',
     authority: 'Jamiat Ulama / Star-K International',
-    regNumber: 'HK-S2S-2024-9128',
     category: 'Dietary Compliance',
     description: 'Certified 100% plant-based, non-GMO, ethanol-free processing and equipment sanitization.',
   },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Clock, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, MessageSquare, Send, CheckCircle2, Copy, Check } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { dispatchEnquiryEmail, EmailDispatchResult, SALES_EMAIL } from '../utils/emailDispatch';
 
 export const ContactSection: React.FC = () => {
   const { t } = useLanguage();
@@ -14,7 +15,9 @@ export const ContactSection: React.FC = () => {
     message: '',
   });
 
-  const [submitted, setSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [dispatchResult, setDispatchResult] = useState<EmailDispatchResult | null>(null);
+  const [copied, setCopied] = useState(false);
   const [cuddaloreTime, setCuddaloreTime] = useState<string>('');
   const [buyerTime, setBuyerTime] = useState<string>('');
 
@@ -46,21 +49,47 @@ export const ContactSection: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({
-        name: '',
-        company: '',
-        email: '',
-        phoneWhatsapp: '',
-        destinationCountry: '',
-        inquiryTopic: 'Commercial Container Shipment (FCL)',
-        message: '',
-      });
-    }, 5000);
+    setIsSending(true);
+
+    const result = await dispatchEnquiryEmail({
+      subject: `Export Inquiry [${formData.inquiryTopic}] - ${formData.company || formData.name}`,
+      replyTo: formData.email,
+      fields: {
+        'Full Name': formData.name,
+        'Company / Organization': formData.company,
+        'Business Email': formData.email,
+        'Phone / WhatsApp': formData.phoneWhatsapp,
+        'Target Destination Country & Port': formData.destinationCountry,
+        'Inquiry Category': formData.inquiryTopic,
+        'Consignment Requirements & Message': formData.message,
+      },
+    });
+
+    setDispatchResult(result);
+    setIsSending(false);
+  };
+
+  const handleReset = () => {
+    setDispatchResult(null);
+    setCopied(false);
+    setFormData({
+      name: '',
+      company: '',
+      email: '',
+      phoneWhatsapp: '',
+      destinationCountry: '',
+      inquiryTopic: 'Commercial Container Shipment (FCL)',
+      message: '',
+    });
+  };
+
+  const handleCopy = () => {
+    if (!dispatchResult) return;
+    navigator.clipboard.writeText(dispatchResult.formattedBody);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   const whatsappLink = `https://wa.me/919894660672?text=${encodeURIComponent(
@@ -160,16 +189,10 @@ export const ContactSection: React.FC = () => {
                 <div>
                   <strong className="text-white block text-sm font-sans">Official Commercial Inquiries:</strong>
                   <a
-                    href="mailto:export@s2sglobalexim.com"
+                    href="mailto:sales@s2sglobalexim.com"
                     className="text-stone-300 hover:text-white underline font-mono-numbers text-xs mt-0.5 block"
                   >
-                    export@s2sglobalexim.com
-                  </a>
-                  <a
-                    href="mailto:trade@s2sglobalexim.com"
-                    className="text-stone-400 hover:text-white underline font-mono-numbers text-xs block"
-                  >
-                    trade@s2sglobalexim.com
+                    sales@s2sglobalexim.com
                   </a>
                 </div>
               </div>
@@ -187,13 +210,62 @@ export const ContactSection: React.FC = () => {
               </p>
             </div>
 
-            {submitted ? (
-              <div className="p-6 bg-emerald-950/60 border border-emerald-700 rounded-lg text-center space-y-3">
-                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-                <h4 className="text-base font-bold text-white">Inquiry Received Successfully</h4>
-                <p className="text-xs text-emerald-200 leading-relaxed max-w-md mx-auto">
-                  Thank you. An export trade officer from our Cuddalore processing headquarters will contact your team via email and WhatsApp with relevant lab specifications and shipping tariffs.
-                </p>
+            {dispatchResult ? (
+              <div className="p-6 bg-emerald-950/60 border border-emerald-700 rounded-lg space-y-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <h4 className="text-base font-bold text-white">
+                      {dispatchResult.relayStatus === 'sent'
+                        ? `Inquiry Sent Directly to ${SALES_EMAIL}`
+                        : `Email Prepared for Immediate Dispatch to ${SALES_EMAIL}`}
+                    </h4>
+                    <p className="text-xs text-emerald-200 leading-relaxed">
+                      All inquiry details have been formatted and triggered for <strong className="text-white">{SALES_EMAIL}</strong>. If your email app did not open automatically, click below to send or forward instantly.
+                    </p>
+                  </div>
+                </div>
+
+                <pre className="p-3.5 bg-stone-900 border border-stone-800 rounded-lg text-[11px] font-mono-numbers text-stone-300 whitespace-pre-wrap max-h-48 overflow-y-auto">
+                  {dispatchResult.formattedBody}
+                </pre>
+
+                <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                  <a
+                    href={dispatchResult.mailtoUrl}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-400 hover:bg-amber-300 text-stone-950 rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Send via Email ({SALES_EMAIL})</span>
+                  </a>
+
+                  <a
+                    href={dispatchResult.whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>Send via WhatsApp</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copied ? 'Copied' : 'Copy Details'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="ml-auto text-xs text-stone-300 hover:text-white underline cursor-pointer"
+                  >
+                    New Inquiry
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -306,10 +378,11 @@ export const ContactSection: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 text-xs font-semibold text-stone-950 bg-amber-400 hover:bg-amber-300 rounded-lg transition-colors cursor-pointer shadow-md font-sans"
+                  disabled={isSending}
+                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 text-xs font-semibold text-stone-950 bg-amber-400 hover:bg-amber-300 rounded-lg transition-colors cursor-pointer shadow-md font-sans disabled:opacity-60"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>{t('contact.submitButton')}</span>
+                  <span>{isSending ? `Sending to ${SALES_EMAIL}...` : t('contact.submitButton')}</span>
                 </button>
               </form>
             )}

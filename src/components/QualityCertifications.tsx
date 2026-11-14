@@ -118,9 +118,10 @@ export const QualityCertifications: React.FC = () => {
               </div>
 
               <div className="pt-3 border-t border-stone-200/80 flex items-center justify-between text-xs">
-                <span className="text-stone-500">License / Reg:</span>
-                <span className="font-mono-numbers font-semibold text-stone-900">
-                  {cert.regNumber}
+                <span className="text-stone-500">Compliance Status:</span>
+                <span className="inline-flex items-center gap-1 font-semibold text-emerald-800">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>Active · Verified</span>
                 </span>
               </div>
             </div>

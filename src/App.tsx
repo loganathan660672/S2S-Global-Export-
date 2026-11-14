@@ -12,8 +12,8 @@ import { ProductsSection } from './components/ProductsSection';
 import { SupplyChainMap } from './components/SupplyChainMap';
 import { B2BOrderPortal } from './components/B2BOrderPortal';
 import { QualityCertifications } from './components/QualityCertifications';
-import { ClientTestimonials } from './components/ClientTestimonials';
 import { AboutCuddalore } from './components/AboutCuddalore';
+import { FAQAccordion } from './components/FAQAccordion';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 
@@ -93,16 +93,16 @@ function MainApp() {
         {/* 4. Quality, Compliance & Lab Testing Matrix */}
         <QualityCertifications />
 
-        {/* 5. Client Testimonials & Proven International Trade Records */}
-        <ClientTestimonials onOpenRFQ={() => handleTabChange('b2b-portal')} />
-
-        {/* 6. About Cuddalore Heritage & Direct Farmer Model */}
+        {/* 5. About Cuddalore Heritage & Direct Farmer Model */}
         <AboutCuddalore
           onOpenRFQ={() => handleTabChange('b2b-portal')}
           onExploreProducts={() => handleTabChange('products')}
         />
 
-        {/* 7. Direct Contact & Live Synchronized Clocks */}
+        {/* 7. B2B Export FAQ Accordion */}
+        <FAQAccordion onOpenRFQ={() => handleTabChange('b2b-portal')} />
+
+        {/* 8. Direct Contact & Live Synchronized Clocks */}
         <ContactSection />
       </main>
 

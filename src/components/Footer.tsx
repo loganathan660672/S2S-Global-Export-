@@ -42,6 +42,9 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab, onOpenRFQ }) => {
               <div className="pt-1">
                 WhatsApp / Tel: <a href="https://wa.me/919894660672" className="text-amber-300 font-mono-numbers hover:underline font-semibold">+91 9894660672</a>
               </div>
+              <div>
+                Email: <a href="mailto:sales@s2sglobalexim.com" className="text-emerald-400 font-mono-numbers hover:underline font-semibold">sales@s2sglobalexim.com</a>
+              </div>
             </div>
           </div>
 
@@ -118,14 +121,6 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab, onOpenRFQ }) => {
               </li>
               <li>
                 <button
-                  onClick={() => setActiveTab('testimonials')}
-                  className="hover:text-white transition-colors cursor-pointer text-left"
-                >
-                  Verified Buyer Testimonials
-                </button>
-              </li>
-              <li>
-                <button
                   onClick={() => setActiveTab('about')}
                   className="hover:text-white transition-colors cursor-pointer text-left"
                 >
@@ -134,10 +129,18 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab, onOpenRFQ }) => {
               </li>
               <li>
                 <button
+                  onClick={() => setActiveTab('faq')}
+                  className="hover:text-white transition-colors cursor-pointer text-left"
+                >
+                  Export FAQ &amp; Incoterms
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => setActiveTab('contact')}
                   className="hover:text-white transition-colors cursor-pointer text-left"
                 >
-                  Direct Export Desk & WhatsApp
+                  Direct Export Desk &amp; WhatsApp
                 </button>
               </li>
             </ul>
@@ -149,7 +152,7 @@ export const Footer: React.FC<FooterProps> = ({ setActiveTab, onOpenRFQ }) => {
               Statutory Export Accreditations
             </div>
             <p className="text-[11px] text-stone-400 leading-relaxed">
-              Export Registration with APEDA, Spices Board India, FSSAI Central Export License #10024042000892, USDA Organic / NPOP Equivalent, and US-FDA Registered Foreign Food Facility.
+              Export Registration with APEDA, Spices Board India, FSSAI Central Export License, USDA Organic / NPOP Equivalent, and US-FDA Registered Foreign Food Facility.
             </p>
             <button
               onClick={onOpenRFQ}

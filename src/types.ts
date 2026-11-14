@@ -19,7 +19,6 @@ export interface CertificateItem {
   id: string;
   name: string;
   authority: string;
-  regNumber: string;
   validity: string;
   badge: string;
   scope: string;
@@ -117,6 +116,5 @@ export interface RFQSubmission {
   items: RFQItem[];
   containerRequirement: '20ft FCL' | '40ft HC' | 'LCL (Palletized)' | 'Air Express Sample';
   customNotes?: string;
-  estimatedTotalUSD: number;
   submittedAt: string;
 }
